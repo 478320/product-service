@@ -17,7 +17,11 @@ services:
       - --default-time-zone=+08:00
 
   elasticsearch:
-    image: docker.m.daocloud.io/library/elasticsearch:8.13.4
+    build:
+      context: ./docker/elasticsearch
+      args:
+        ES_VERSION: 8.13.4
+    image: product-elasticsearch:8.13.4-ik-pinyin
     container_name: product-es
     restart: unless-stopped
     environment:
@@ -31,6 +35,22 @@ services:
     volumes:
       - es_data:/usr/share/elasticsearch/data
 
+  kibana:
+    image: docker.m.daocloud.io/library/kibana:8.13.4
+    container_name: product-kibana
+    restart: unless-stopped
+    depends_on:
+      - elasticsearch
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      I18N_LOCALE: zh-CN
+      TZ: Asia/Shanghai
+    ports:
+      - "5601:5601"
+    volumes:
+      - kibana_data:/usr/share/kibana/data
+
 volumes:
   mysql_data:
   es_data:
+  kibana_data:
